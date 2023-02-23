@@ -11,7 +11,7 @@ const isOtpAuth = async (req, res, next) => {
     const token = authorization.split(" ")[1];
     console.log('token:', token); // add this line to check the value of token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded._id);
     console.log("decoded._id:", decoded._id);
 
     if (!user) {

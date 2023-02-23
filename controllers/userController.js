@@ -1,26 +1,26 @@
 const User = require("../model/usermodel");
 const generateToken = require("../utils/jsonToken");
 const generateOtp = require("../utils/otpGenerator");
-require("../middleware/otpAuth");
 
 const signupUser = async (req, res) => {
   try {
     const { fullname, email, mobile } = req.body;
-    let exist = await User.findOne({ mobile });
-    if (exist) {
-      return res.status(400).json("user alredy exist");
+    let user = await User.findOne({ mobile });
+    if (user) {
+      return res.status(400).json({status:true,message:"user alredy exist",response:[]});
     }
     let otp = generateOtp(4, true, false, false, false);
-    let signupUser = new User({
+    user = await User.create({
       fullname,
       email,
       mobile,
       otp,
       otp_expiry: new Date(Date.now() + process.env.OTP_EXPIRE * 60 * 1000),
+      
     });
-    let token = generateToken(signupUser._id);
-    await signupUser.save();
-    res.status(200).json({ status: true, message: "user successfully created", response: [signupUser, { token: token }] });
+    let token = generateToken(user._id);
+
+    res.status(200).json({ status: true, message: "Otp sent successfully", response: [ {...user._doc, token: token}]});
   } catch (err) {
     res.status(400).json(err.message);
   }
@@ -37,12 +37,13 @@ const verify = async (req, res) => {
     user.otp_expiry = null;
     await user.save();
 
-    const token = generateToken(user);
+    const token = user.generateToken();
     res.json({
       status: true,
       message: `Welcome ${user.fullname}, Logged in successfully`,
       response: [user, { token: token }],
     });
+
   } catch (error) {
     res.json({ status: false, message: error.message, response: [] });
   }
@@ -82,7 +83,7 @@ const login = async (req, res) => {
 
     //* Checking user has already exists or not with same Email
     if (!user) {
-      return res.status(400).json("user not exist");
+      return res.status(400).json({status:false,message:"user not exist",response:[]});
     }
     //@ Generating OTP
     let otp = generateOtp(4, true, false, false, false);

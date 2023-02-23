@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const jwt = require("jsonwebtoken")
 
 const userSchema = new mongoose.Schema({
     fullname:{
@@ -19,7 +20,9 @@ const userSchema = new mongoose.Schema({
     otp_expiry:{ 
         type:Date
     }
-})
+},{timestamps:true})
+
+userSchema.index({ otp_expiry: 1 }, { expireAfterSeconds: 0 });
 
 const User = new mongoose.model("User", userSchema)
 
