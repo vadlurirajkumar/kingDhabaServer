@@ -2,8 +2,8 @@ const  Admin = require("../model/adminModel");
 const User = require("../model/usermodel")
 const adminLogin = async (req, res) => {
   try {
-    const {userId, auth} = req.body
-    if (!userId || !auth) {
+    const {userId, password} = req.body
+    if (!userId || !password) {
       return res.json({status:false, message:"please enter all fields", response:[]});
     }
 
@@ -12,8 +12,8 @@ const adminLogin = async (req, res) => {
     if (!user) {
       return res.json({status:false, message:"invalid userId",response:[]});
     }
-    if (user.auth !== auth) {
-      return res.json({status:false, message:"invalid auth",response:[]});
+    if (user.password !== password) {
+      return res.json({status:false, message:"invalid password",response:[]});
     }
     const token = user.generateToken();
     res.status(200).json({
@@ -32,7 +32,7 @@ export const getRequestEmployees = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin._id);
     if (!admin) {
-      return res_failed(res, "Admin not Authorized");
+      return res_failed(res, "Admin not passwordorized");
     }
     const employees = await Employee.find({ request: true });
     if (employees.length <= 0) {
@@ -49,7 +49,7 @@ export const verifiedEmployee = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin._id);
     if (!admin) {
-      return res_failed(res, "Admin not Authorized");
+      return res_failed(res, "Admin not passwordorized");
     }
     const employees = await Employee.find({ isVerified: true });
     if (employees.length <= 0) {
@@ -84,7 +84,7 @@ export const acceptEmployee = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin._id);
     if (!admin) {
-      return res_failed(res, "Admin not Authorized");
+      return res_failed(res, "Admin not passwordorized");
     }
     const { id } = req.params;
     const employee = await Employee.findById(id);
@@ -121,7 +121,7 @@ export const declineEmployee = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin._id);
     if (!admin) {
-      return res_failed(res, "Admin not Authorized");
+      return res_failed(res, "Admin not passwordorized");
     }
     const { id } = req.params;
     const employee = await Employee.findById(id);
