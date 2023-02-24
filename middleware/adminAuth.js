@@ -12,7 +12,7 @@ const  Admin  = require("../model/adminModel");
     console.log("token " + token);
 
     var decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.admin = await Admin.findById(decoded.id);
+    req.admin = await Admin.findById(decoded._id);
     // console.log(req.user._id)
     next();
   } catch (error) {

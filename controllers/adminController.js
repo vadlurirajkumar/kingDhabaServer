@@ -1,14 +1,11 @@
 const  Admin = require("../model/adminModel");
-// const User = require("../model/usermodel")
-
+const User = require("../model/usermodel")
 const adminLogin = async (req, res) => {
   try {
-    // const { userId, auth, secret } = req.body;
     const {userId, auth} = req.body
     if (!userId || !auth) {
       return res.json({status:false, message:"please enter all fields", response:[]});
     }
-    // const Admin_secretKey = process.env.ADMIN_SECRET_KEY;
 
     // * Checking if Admin has registered or not
     let user = await Admin.findOne({ userId });
@@ -26,7 +23,7 @@ const adminLogin = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res_catch(res, error);
+    return res.json({status:false, message:error.message,response:[]});
   }
 };
 
@@ -62,25 +59,26 @@ export const verifiedEmployee = async (req, res) => {
   } catch (error) {
     res_catch(res, error);
   }
-};
+}; */}
 
 //? Find Total Employees
-export const totalEmployees = async (req, res) => {
+const totalUsers = async (req, res) => {
   try {
-    const admin = await Admin.findById(req.admin._id);
+    const admin = await Admin.findById(req.admin.id);
     if (!admin) {
-      return res_failed(res, "Admin not Authorized");
+      return res.json({status:false, message:"Admin not authorised", response:[]});
     }
-    const employees = await Employee.find({});
-    if (employees.length <= 0) {
-      return res_failed(res, "Employees not found");
+    const user = await User.find({});
+    if (user.length <= 0) {
+      return res.json({status:false, message:"Users not found", response:[]});
     }
-    res_success(res, "Employees", employees);
+    return res.json({status:true, message:"users fetch success", response:[user]});
   } catch (error) {
-    res_catch(res, error);
+    return res.json({status:false, message:error.message, response:[]});
   }
 };
 
+{/*
 //? Accept Employees
 export const acceptEmployee = async (req, res) => {
   try {
@@ -154,4 +152,4 @@ export const declineEmployee = async (req, res) => {
 }; */}
 
 
-module.exports = adminLogin;
+module.exports = {adminLogin , totalUsers};
