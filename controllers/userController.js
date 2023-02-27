@@ -2,6 +2,8 @@ const User = require("../model/usermodel");
 const generateToken = require("../utils/jsonToken");
 const generateOtp = require("../utils/otpGenerator");
 
+// user registration
+
 const signupUser = async (req, res) => {
   try {
     const { fullname, email, mobile } = req.body;
@@ -18,6 +20,7 @@ const signupUser = async (req, res) => {
       mobile,
       otp,
       otp_expiry: new Date(Date.now() + process.env.OTP_EXPIRE * 60 * 1000),
+      status: 'active', // set status to 'active' by default
     });
     let token = generateToken(user._id);
 
@@ -32,6 +35,8 @@ const signupUser = async (req, res) => {
     res.status(400).json(err.message);
   }
 };
+
+// user verification 
 
 const verify = async (req, res) => {
   try {
@@ -59,7 +64,7 @@ const verify = async (req, res) => {
   }
 };
 
-//? Resend OTP
+// Resend OTP
 const resendOtp = async (req, res) => {
   try {
     const { mobile } = req.body;
@@ -89,6 +94,36 @@ const resendOtp = async (req, res) => {
 
 //login
 
+// const login = async (req, res) => {
+//   try {
+//     const { mobile } = req.body;
+
+//     let user = await User.findOne({ mobile });
+
+//     //* Checking user has already exists or not with same mobile
+//     if (!user) {
+//       return res
+//         .status(400)
+//         .json({ status: false, message: "user not exist", response: [] });
+//     }
+//     //@ Generating OTP
+//     let otp = generateOtp(4, true, false, false, false);
+
+//     const token = generateToken(user._id);
+//     user.otp = otp;
+//     user.otp_expiry = new Date(Date.now() + process.env.OTP_EXPIRE * 60 * 1000);
+//     await user.save();
+
+//     res.json({
+//       status: true,
+//       message: `OTP sent to : ${user.mobile}, please verify your mobile first`,
+//       response: [{ ...user._doc, token: token }],
+//     });
+//   } catch (error) {
+//     res.json({ status: false, message: error.message, response: [] });
+//   }
+// };
+
 const login = async (req, res) => {
   try {
     const { mobile } = req.body;
@@ -101,6 +136,12 @@ const login = async (req, res) => {
         .status(400)
         .json({ status: false, message: "user not exist", response: [] });
     }
+
+    // Check if user is active
+    if (user.status === 'inactive') {
+      return res.status(400).json({ status: false, message: "Your account is inactive. Please contact the admin.", response: [] });
+    }
+
     //@ Generating OTP
     let otp = generateOtp(4, true, false, false, false);
 
@@ -118,5 +159,6 @@ const login = async (req, res) => {
     res.json({ status: false, message: error.message, response: [] });
   }
 };
+
 
 module.exports = { signupUser, verify, resendOtp, login };

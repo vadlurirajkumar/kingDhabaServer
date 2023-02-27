@@ -1,15 +1,13 @@
 const express = require("express");
-const {adminLogin, totalUsers} = require("../controllers/adminController")
-// import { acceptEmployee, adminLogin, declineEmployee, getRequestEmployees, totalEmployees, verifiedEmployee } from "../controllers/admin.service.js";
+const adminRouter = express.Router();
+const {adminLogin, totalUsers, updateUserStatus, deleteUser} = require("../controllers/adminController")
 const isAdminAuth = require("../middleware/adminAuth");
 
-const adminRouter = express.Router();
-
+// routes
 adminRouter.post("/login", adminLogin);
-// adminRouter.get("/getrequest", isAdminAuth, getRequestEmployees);
-// adminRouter.get("/verifiedemp", isAdminAuth, verifiedEmployee);
 adminRouter.get("/allusers", isAdminAuth, totalUsers);
-// adminRouter.patch("/accept-request/:id", isAdminAuth, acceptEmployee);
-// adminRouter.patch("/decline/:id", isAdminAuth, declineEmployee);
+adminRouter.put('/:id', isAdminAuth, updateUserStatus);
+adminRouter.delete("/user/:id", isAdminAuth, deleteUser);
+
 
 module.exports =  adminRouter;

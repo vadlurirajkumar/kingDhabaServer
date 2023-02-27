@@ -1,18 +1,25 @@
 const express = require("express")
-const app = express()
-const dotenv = require("dotenv")
-dotenv.config();
+require("dotenv").config();
 const cors = require("cors")
+const port = process.env.PORT
+const app = express()
+
+// Db connection 
+require("./conifg/dbFile")
+
+// importing router files
 const router = require("./routes/userRoute")
 const adminRoute = require("./routes/adminRoute")
-require("./conifg/dbFile")
-const port = process.env.PORT
 
+// middleware
 app.use(express.json())
 app.use(cors());
-app.use("/", router)
-app.use("/admin", adminRoute)
 
+// admin& user routes
+app.use("/user", router) // user route calling
+app.use("/admin", adminRoute) // admin route calling
+
+// Port 
 app.listen(port, ()=>{
     console.log(`port running at ${port}`)
 })

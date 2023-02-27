@@ -1,6 +1,6 @@
 const otpgenerator = require("otp-generator");
 
-//? OTP Generator
+// OTP Generator
 const generateOtp = (length, dgt, up, lw, spc) => {
     let otp = otpgenerator.generate(length, {
       digits: dgt,

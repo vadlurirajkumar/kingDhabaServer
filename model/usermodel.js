@@ -1,5 +1,4 @@
 const mongoose = require("mongoose")
-const jwt = require("jsonwebtoken")
 
 const userSchema = new mongoose.Schema({
     fullname:{
@@ -14,6 +13,11 @@ const userSchema = new mongoose.Schema({
         required:true,
         unique:true
     },
+    status: {
+        type: String,
+        enum: ["active", "inactive"],
+        default: "active" // Set the default value for the status field to "active"
+      },
     otp:{
         type:String
     },
