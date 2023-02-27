@@ -11,7 +11,7 @@ const signupUser = async (req, res) => {
     if (user) {
       return res
         .status(400)
-        .json({ status: true, message: "user alredy exist", response: [] });
+        .json({ status: false, message: "user alredy exist", response: [] });
     }
     let otp = generateOtp(4, true, false, false, false);
     user = await User.create({
@@ -32,7 +32,8 @@ const signupUser = async (req, res) => {
         response: [{ ...user._doc, token: token }],
       });
   } catch (err) {
-    res.status(400).json(err.message);
+    res.status(400).json({ status: false, message:err.message, response: [] });
+
   }
 };
 
@@ -160,5 +161,23 @@ const login = async (req, res) => {
   }
 };
 
+// update location of user
 
-module.exports = { signupUser, verify, resendOtp, login };
+updateLocation = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      location: req.body.location
+    }, { new: true });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.send(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+};
+
+
+
+module.exports = { signupUser, verify, resendOtp, login , updateLocation};

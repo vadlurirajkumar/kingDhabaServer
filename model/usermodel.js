@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
         enum: ["active", "inactive"],
         default: "active" // Set the default value for the status field to "active"
       },
+      location:{
+        type:String,
+        required:false
+      },
     otp:{
         type:String
     },
