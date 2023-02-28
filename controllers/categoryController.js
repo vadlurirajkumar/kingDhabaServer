@@ -3,27 +3,115 @@ const slugify = require( "slugify");
 const cloudinary = require("cloudinary")
 
 //create category
-const createCategoryController = async (req, res) => {
+// const createCategoryController = async (req, res) => {
+//   try {
+//     const { Cname } = req.body;
+//     if (!Cname) {
+//       return res.status(401).send({ message: "CName is required" });
+//     }
+//     const existingCategory = await categoryModel.findOne({ Cname });
+//     if (existingCategory) {
+//       return res.status(200).send({
+//         success: false,
+//         message: "Category Already Exisits",
+//       });
+//     }
+//     const category = await new categoryModel({
+//       Cname,
+//       slug: slugify(Cname),
+//       status :"active"
+//       }).save();
+//     res.status(201).send({
+//       success: true,
+//       message: "new category created",
+//       category,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       success: false,
+//       error,
+//       message: "Error in Category",
+//     });
+//   }
+// };
+// const createCategoryWithImage = async (req, res) => {
+//   try {
+//     const {Cname}  = req.body;
+//     console.log(Cname)
+//     if (!Cname) {
+//       return res.status(401).send({ message: "CName is required" });
+//     }
+//     const existingCategory = await categoryModel.findOne({ Cname });
+//     if (existingCategory) {
+//       return res.status(200).send({
+//         success: false,
+//         message: "Category already exists",
+//       });
+//     }
+//     const result = await cloudinary.v2.uploader.upload(req.file.path);
+//     if (!result) {
+//       return res.status(500).json({
+//         success: false,
+//         message: "Error while uploading image",
+//       });
+//     }
+//     const category = await new categoryModel({
+//       Cname,
+//       slug: slugify(Cname),
+//       status: "active",
+//       avatar: {
+//         public_id: result.public_id,
+//         url: result.secure_url,
+//       },
+//     }).save();
+//     res.status(201).send({
+//       success: true,
+//       message: "New category created with image upload",
+//       category,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       success: false,
+//       error,
+//       message: "Error in Category",
+//     });
+//   }
+// };
+const createCategoryWithImage = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
-      return res.status(401).send({ message: "Name is required" });
+    const { Cname } = req.body;
+    console.log(Cname);
+    if (!Cname) {
+      return res.status(401).send({ message: "CName is required" });
     }
-    const existingCategory = await categoryModel.findOne({ name });
+    const existingCategory = await categoryModel.findOne({ Cname });
     if (existingCategory) {
       return res.status(200).send({
         success: false,
-        message: "Category Already Exisits",
+        message: "Category already exists",
+      });
+    }
+    const result = await cloudinary.v2.uploader.upload(req.file.path);
+    if (!result) {
+      return res.status(500).json({
+        success: false,
+        message: "Error while uploading image",
       });
     }
     const category = await new categoryModel({
-      name,
-      slug: slugify(name),
-      status :"active"
-      }).save();
+      Cname,
+      slug: slugify(Cname),
+      status: "active",
+      avatar: {
+        public_id: result.public_id,
+        url: result.secure_url,
+      },
+    }).save();
     res.status(201).send({
       success: true,
-      message: "new category created",
+      message: "New category created with image upload",
       category,
     });
   } catch (error) {
@@ -36,14 +124,16 @@ const createCategoryController = async (req, res) => {
   }
 };
 
+
+
 //update category
 const updateCategoryController = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { Cname } = req.body;
     const { id } = req.params;
     const category = await categoryModel.findByIdAndUpdate(
       id,
-      { name, slug: slugify(name) },
+      { Cname, slug: slugify(Cname) },
       { new: true }
     );
     res.status(200).send({
@@ -161,4 +251,4 @@ const updateImage = async (req, res) => {
   
 
 
-module.exports = {createCategoryController, updateCategoryController, categoryControlller, singleCategoryController, deleteCategoryCOntroller, updateImage}
+module.exports = {createCategoryWithImage, updateCategoryController, categoryControlller, singleCategoryController, deleteCategoryCOntroller, updateImage}
