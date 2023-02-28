@@ -1,5 +1,6 @@
 const Admin = require("../model/adminModel");
 const User = require("../model/usermodel");
+const cloudinary = require("cloudinary")
 
 // admin Login
 const adminLogin = async (req, res) => {
@@ -72,7 +73,7 @@ const totalUsers = async (req, res) => {
 
 // this is for admin will get only user status "active" only
 
-// const totalUsers = async (req, res) => {
+// const totalUsers = async (req, res) => {  
 //   try {
 //     const admin = await Admin.findById(req.admin.id);
 //     if (!admin) {
@@ -145,64 +146,5 @@ const deleteUser = async (req, res) => {
   }
 };
 
-//? Update picture
-const updateImage = async (req, res) => {
-  try {
-    const result = await cloudinary.v2.uploader.upload(req.file.path);
-    const user = await Employee.findById(req.user._id);
-    let image = await user.avatar.public_id;
-    if (result) {
-      if (!image) {
-        user.avatar.public_id = result.public_id;
-        user.avatar.url = result.secure_url;
-      } else {
-        await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-
-        user.avatar.public_id = result.public_id;
-        user.avatar.url = result.secure_url;
-      }
-    } else {
-      res.json({
-        status: false,
-        message: "Error - profile update failed",
-        response: [],
-      });
-    }
-
-    await user.save();
-    res.json({
-      status: true,
-      message: "Image Updated",
-      response: [user.avatar],
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: false,
-        message: error.message,
-        response: ["path not found error"],
-      });
-  }
-};
-
-//? Delete  picture
-const deleteImage = async (req, res) => {
-  try {
-    const user = await Employee.findById(req.user._id);
-    await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-
-    user.avatar.public_id = "";
-    user.avatar.url = "";
-    await user.save();
-    res.json({
-      status: true,
-      message: "Image Deleted",
-      response: [user.avatar],
-    });
-  } catch (error) {
-    res.json({ status: false, message: error.message, response: [] });
-  }
-};
 
 module.exports = { adminLogin, totalUsers, updateUserStatus, deleteUser };

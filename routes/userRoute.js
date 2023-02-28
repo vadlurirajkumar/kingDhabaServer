@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const {signupUser, verify,login,resendOtp , updateLocation} = require("../controllers/userController")
+const {signupUser, verify,login,resendOtp , updateLocation, } = require("../controllers/userController")
 const isOtpAuth = require("../middleware/otpAuth")
 
 // routes
