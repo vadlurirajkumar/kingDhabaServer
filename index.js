@@ -20,6 +20,8 @@ cloudinary.config({
 const router = require("./routes/userRoute")
 const adminRoute = require("./routes/adminRoute")
 const categoryRoute = require("./routes/categoryRoute")
+const productRoute = require("./routes/productRoute")
+
 
 // middleware
 app.use(express.json())
@@ -29,6 +31,7 @@ app.use(cors());
 app.use("/user", router) // user route calling
 app.use("/admin", adminRoute) // admin route calling
 app.use("/category" , categoryRoute) // categories route calling
+app.use("/product", productRoute) // products route calling
 
 // Port 
 app.listen(port, ()=>{

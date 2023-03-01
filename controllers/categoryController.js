@@ -1,33 +1,29 @@
 const categoryModel = require("../model/categoryModel");
-const slugify = require("slugify");
 const cloudinary = require("cloudinary");
 
 // create category
-
 const createCategoryWithImage = async (req, res) => {
   try {
     const { categoryName } = req.body;
-    console.log(categoryName);
     if (!categoryName) {
       return res.status(401).send({ message: "categoryName is required" });
     }
     const existingCategory = await categoryModel.findOne({ categoryName });
     if (existingCategory) {
       return res.status(200).send({
-        success: false,
+        status: false,
         message: "Category already exists",
       });
     }
     const result = await cloudinary.v2.uploader.upload(req.file.path);
     if (!result) {
       return res.status(500).json({
-        success: false,
+        status: false,
         message: "Error while uploading image",
       });
     }
     const category = await new categoryModel({
       categoryName,
-      slug: slugify(categoryName),
       status: "active",
       avatar: {
         public_id: result.public_id,
@@ -35,14 +31,14 @@ const createCategoryWithImage = async (req, res) => {
       },
     }).save();
     res.status(201).send({
-      success: true,
+      status: true,
       message: "New category created with image upload",
       category,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      success: false,
+      status: false,
       error,
       message: "Error in Category",
     });
@@ -50,77 +46,82 @@ const createCategoryWithImage = async (req, res) => {
 };
 
 //update category
-
 const updateCategory = async (req, res) => {
   try {
-    const { categoryName, status } = req.body;
-    const { id } = req.params;
+    const categoryId = await categoryModel.findById(req.params.id);
+    const { categoryName, status, avatar } = req.body;
 
-    const user = await categoryModel.findById(id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-
-    if (categoryName) {
-      user.categoryName = categoryName;
-      user.slug = slugify(categoryName);
-    }
-
-    if (status) {
-      user.status = status;
-    }
-
-    if (req.file) {
+    const updatedFields = {};
+    if (categoryName) updatedFields.categoryName = categoryName;
+    if (status) updatedFields.status = status;
+    if (avatar) {
       const result = await cloudinary.v2.uploader.upload(req.file.path);
       if (!result) {
         return res.status(500).json({
-          success: false,
+          status: false,
           message: "Error while uploading image",
         });
       }
-
-      if (user.avatar.public_id) {
-        await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-      }
-
-      user.avatar.public_id = result.public_id;
-      user.avatar.url = result.secure_url;
+      updatedFields.avatar = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
+    const updatedCategory = await categoryModel.findByIdAndUpdate(
+      categoryId,
+      { $set: updatedFields },
+      { new: true }
+    );
 
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Category Updated Successfully",
-      category: user,
+    res.status(200).send({
+      status: true,
+      message: "Category updated successfully",
+      category: updatedCategory,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Error while updating category",
+    res.status(500).send({
+      status: false,
       error,
+      message: "Error in updating category",
     });
   }
 };
 
 // get all categories
-
 const getAllCategories = async (req, res) => {
   try {
     const category = await categoryModel.find({ status: "active" });
     res.status(200).send({
-      success: true,
+      status: true,
       message: "All Categories List",
       category,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      success: false,
+      status: false,
+      error,
+      message: "Error while getting all categories",
+    });
+  }
+};
+
+// get all categories with products
+const getAllCategoriesWithProducts = async (req, res) => {
+  try {
+    const category = await categoryModel
+      .find({ status: "active" })
+      .populate("products");
+    res.status(200).send({
+      status: true,
+      message: "All Categories List",
+      category,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      status: false,
       error,
       message: "Error while getting all categories",
     });
@@ -128,32 +129,31 @@ const getAllCategories = async (req, res) => {
 };
 
 // single category
-
 const getSingleCategory = async (req, res) => {
   try {
     const category = await categoryModel.findById(req.params.id);
     const name = category.categoryName;
     if (category && category.status === "active") {
       return res.status(200).send({
-        success: true,
-        message: "Get Single Category Successfully",
+        status: true,
+        message: "Get Single Category successfully",
         category,
       });
     } else if (category && category.status === "inactive") {
       return res.status(200).send({
-        success: false,
+        status: false,
         message: `Category - ${name} is inactive, please contact admin to activate it`,
       });
     } else {
       return res.status(404).send({
-        success: false,
+        status: false,
         message: "Category not found",
       });
     }
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      success: false,
+      status: false,
       error,
       message: "Error while getting Single Category",
     });
@@ -161,64 +161,21 @@ const getSingleCategory = async (req, res) => {
 };
 
 //delete category
-
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
     await categoryModel.findByIdAndDelete(id);
     res.status(200).send({
-      success: true,
-      message: "Categry Deleted Successfully",
+      status: true,
+      message: "Categry Deleted successfully",
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      success: false,
+      status: false,
       message: "error while deleting category",
       error,
     });
-  }
-};
-
-// update category picture
-const updateImage = async (req, res) => {
-  try {
-    const result = await cloudinary.v2.uploader.upload(req.file.path);
-    console.log(result);
-    const { id } = req.params;
-    const user = await categoryModel.findById(id);
-    console.log("user" + user);
-    let image = await user.avatar.public_id;
-    if (result) {
-      if (!image) {
-        user.avatar.public_id = result.public_id;
-        user.avatar.url = result.secure_url;
-      } else {
-        await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-
-        user.avatar.public_id = result.public_id;
-        user.avatar.url = result.secure_url;
-      }
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "error while updating image",
-        error,
-      });
-    }
-
-    await user.save();
-    //   res_success(res, "profile Updated", user.avatar);
-    res.status(200).json({
-      success: true,
-      message: "Categry image upload Success",
-      response: [user.avatar],
-    });
-  } catch (error) {
-    // res_catch(res, error);
-    res
-      .status(500)
-      .json({ status: false, message: error.message, response: [] });
   }
 };
 
@@ -226,7 +183,7 @@ module.exports = {
   createCategoryWithImage,
   updateCategory,
   getAllCategories,
+  getAllCategoriesWithProducts,
   getSingleCategory,
   deleteCategory,
-  updateImage,
 };

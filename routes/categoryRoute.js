@@ -3,11 +3,11 @@ const categoryRoute = express.Router();
 const isAdminAuth = require("../middleware/adminAuth");
 const {
   getAllCategories,
+  getAllCategoriesWithProducts,
   createCategoryWithImage,
   deleteCategory,
   getSingleCategory,
-  updateCategory,
-  updateImage,
+  updateCategory
 } = require("./../controllers/categoryController");
 const uploadImage = require("../utils/multer");
 
@@ -32,18 +32,13 @@ categoryRoute.patch(
 //getALl category
 categoryRoute.get("/get-category", getAllCategories);
 
+//get all categories with products
+categoryRoute.get("/get-category-with-products", getAllCategoriesWithProducts);
+
 //single category
 categoryRoute.get("/single-category/:id", getSingleCategory);
 
 //delete category
 categoryRoute.delete("/delete-category/:id", isAdminAuth, deleteCategory);
-
-// updating category image
-categoryRoute.patch(
-  "/updateimg/:id",
-  isAdminAuth,
-  uploadImage.single("avatar"),
-  updateImage
-);
 
 module.exports = categoryRoute;

@@ -3,10 +3,8 @@ const mongoose = require("mongoose");
 const categorySchema = new mongoose.Schema({
   categoryName: {
     type: String,
-  },
-  slug: {
-    type: String,
-    lowercase: true,
+    required:true,
+    unique:true
   },
   status: {
     type: String,
@@ -16,7 +14,15 @@ const categorySchema = new mongoose.Schema({
   avatar: {
     public_id: String,
     url: String,
-  }
+  },
+  products: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Products',
+      
+    },
+  ],
+  
 });
 
 const Category = mongoose.model("Category", categorySchema);
