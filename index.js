@@ -28,7 +28,7 @@ app.use(cors());
 // admin& user routes
 app.use("/user", router) // user route calling
 app.use("/admin", adminRoute) // admin route calling
-app.use("/admin/category" , categoryRoute) // categories route calling
+app.use("/category" , categoryRoute) // categories route calling
 
 // Port 
 app.listen(port, ()=>{
