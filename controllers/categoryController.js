@@ -2,6 +2,7 @@ const categoryModel = require("../model/categoryModel");
 const cloudinary = require("cloudinary");
 
 // create category
+
 const createCategoryWithImage = async (req, res) => {
   try {
     const { categoryName } = req.body;
@@ -30,10 +31,17 @@ const createCategoryWithImage = async (req, res) => {
         url: result.secure_url,
       },
     }).save();
+    const response = {
+      id:category._id,
+      categoryName: category.categoryName,
+      status: category.status,
+      url:category.avatar.url,
+      products: category.products,
+    };
     res.status(201).send({
       status: true,
       message: "New category created with image upload",
-      category,
+      response: [response],
     });
   } catch (error) {
     console.log(error);
@@ -44,6 +52,7 @@ const createCategoryWithImage = async (req, res) => {
     });
   }
 };
+
 
 //update category
 const updateCategory = async (req, res) => {

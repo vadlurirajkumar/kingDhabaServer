@@ -34,18 +34,5 @@ const uploadImage = multer({
 //   limits: { fileSize: 5000000 }, // max file size is 5MB = 5000000 bytes
 // });
 
-//? For upload Banner Image
-// const uploadBannerImage = multer({
-//   storage: multer.diskStorage({}),
-//   filename: (req, file, cb) => {
-//     const ext = path.extname(file.originalname);
-//     if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png") {
-//       cb(new Error("File type not supported"), false);
-//       return;
-//     }
-//     cb(null, true);
-//   },
-// });
-
 
 module.exports = uploadImage;
