@@ -2,7 +2,6 @@ const categoryModel = require("../model/categoryModel");
 const cloudinary = require("cloudinary");
 
 // create category
-
 const createCategoryWithImage = async (req, res) => {
   try {
     const { categoryName } = req.body;
@@ -35,12 +34,12 @@ const createCategoryWithImage = async (req, res) => {
       id:category._id,
       categoryName: category.categoryName,
       status: category.status,
-      url:category.avatar.url,
+      categoryImage:category.avatar.url,
       products: category.products,
     };
     res.status(201).send({
       status: true,
-      message: "New category created with image upload",
+      message: "New category created successfully",
       response: [response],
     });
   } catch (error) {
@@ -52,7 +51,6 @@ const createCategoryWithImage = async (req, res) => {
     });
   }
 };
-
 
 //update category
 const updateCategory = async (req, res) => {
@@ -82,10 +80,18 @@ const updateCategory = async (req, res) => {
       { new: true }
     );
 
+    const response = {
+      id: updatedCategory._id,
+      categoryName: updatedCategory.categoryName,
+      status: updatedCategory.status,
+      categoryImage: updatedCategory.avatar.url,
+      products: updatedCategory.products,
+    };
+
     res.status(200).send({
       status: true,
       message: "Category updated successfully",
-      category: updatedCategory,
+      response: [response],
     });
   } catch (error) {
     console.log(error);
@@ -100,11 +106,22 @@ const updateCategory = async (req, res) => {
 // get all categories
 const getAllCategories = async (req, res) => {
   try {
-    const category = await categoryModel.find({ status: "active" });
+    const categories = await categoryModel.find({ status: "active" });
+
+    const response = categories.map((category) => {
+      return {
+        id: category._id,
+        categoryName: category.categoryName,
+        status: category.status,
+        categoryImage: category.avatar.url,
+        products: category.products,
+      };
+    });
+
     res.status(200).send({
       status: true,
       message: "All Categories List",
-      category,
+      response,
     });
   } catch (error) {
     console.log(error);
@@ -119,13 +136,34 @@ const getAllCategories = async (req, res) => {
 // get all categories with products
 const getAllCategoriesWithProducts = async (req, res) => {
   try {
-    const category = await categoryModel
+    const categories = await categoryModel
       .find({ status: "active" })
       .populate("products");
+
+    const response = categories.map((category) => {
+      return {
+        id: category._id,
+        categoryName: category.categoryName,
+        status: category.status,
+        categoryImage: category.avatar.url,
+        products: category.products.map((product) => {
+          return {
+            id: product._id,
+            productName: product.name,
+            price: product.price,
+            description: product.description,
+            productImage: product.avatar.url,
+            status:product.status,
+            foodType:product.foodType
+        };
+        }),
+      };
+    });
+
     res.status(200).send({
       status: true,
       message: "All Categories List",
-      category,
+      response,
     });
   } catch (error) {
     console.log(error);
@@ -143,10 +181,27 @@ const getSingleCategory = async (req, res) => {
     const category = await categoryModel.findById(req.params.id);
     const name = category.categoryName;
     if (category && category.status === "active") {
+      const response = {
+        id: category._id,
+        categoryName: category.categoryName,
+        status: category.status,
+        categoryImage: category.avatar.url,
+        products: category.products.map((product) => {
+          return {
+            id: product._id,
+            productName: product.name,
+            price: product.price,
+            description: product.description,
+            productImage: product.avatar,
+            status:product.status,
+            foodType:product.foodType
+        };
+        }),
+            };
       return res.status(200).send({
         status: true,
         message: "Get Single Category successfully",
-        category,
+        response: [response],
       });
     } else if (category && category.status === "inactive") {
       return res.status(200).send({
