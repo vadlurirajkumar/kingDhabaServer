@@ -22,7 +22,7 @@ categoryRoute.post(
 );
 
 //update category
-categoryRoute.patch(
+categoryRoute.put(
   "/update-category/:id",
   isAdminAuth,
   uploadImage.single("avatar"),
